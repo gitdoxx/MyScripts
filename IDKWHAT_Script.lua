@@ -1,4 +1,4 @@
--- NFT Battle Precious Team GUI FIXED
+-- NFT Battle Precious Team GUI COMPLETE
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Watermark = Instance.new("TextLabel")
@@ -136,15 +136,14 @@ ToggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
-print("Precious Team GUI loaded! Press Right Shift to toggle menu.")
--- Меню прогноза апгрейдов для NFT Battle
+-- === ПРЕДИКТОР АПГРЕЙДОВ ===
 local PredictFrame = Instance.new("Frame")
 local PredictTitle = Instance.new("TextLabel")
 local PredictScroll = Instance.new("ScrollingFrame")
 local PredictToggle = Instance.new("TextButton")
 local ClosePredict = Instance.new("TextButton")
 
--- Фрейм прогноза (изначально скрыт)
+-- Фрейм прогноза
 PredictFrame.Parent = ScreenGui
 PredictFrame.Size = UDim2.new(0, 350, 0, 400)
 PredictFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
@@ -172,7 +171,7 @@ local PredictTitleCorner = Instance.new("UICorner")
 PredictTitleCorner.Parent = PredictTitle
 PredictTitleCorner.CornerRadius = UDim.new(0, 12)
 
--- Скролл фрейм для списка предметов
+-- Скролл фрейм
 PredictScroll.Parent = PredictFrame
 PredictScroll.Size = UDim2.new(0.9, 0, 0, 300)
 PredictScroll.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -185,7 +184,7 @@ local ScrollCorner = Instance.new("UICorner")
 ScrollCorner.Parent = PredictScroll
 ScrollCorner.CornerRadius = UDim.new(0, 8)
 
--- Кнопка закрытия прогноза
+-- Кнопка закрытия
 ClosePredict.Parent = PredictFrame
 ClosePredict.Size = UDim2.new(0.4, 0, 0, 40)
 ClosePredict.Position = UDim2.new(0.3, 0, 0.9, -45)
@@ -201,7 +200,7 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.Parent = ClosePredict
 CloseCorner.CornerRadius = UDim.new(0, 8)
 
--- Кнопка в главном меню для открытия прогноза
+-- Кнопка Predictor в главном меню
 PredictToggle = Instance.new("TextButton")
 PredictToggle.Parent = MainFrame
 PredictToggle.Size = UDim2.new(0.7, 0, 0, 40)
@@ -218,33 +217,57 @@ local PredictToggleCorner = Instance.new("UICorner")
 PredictToggleCorner.Parent = PredictToggle
 PredictToggleCorner.CornerRadius = UDim.new(0, 8)
 
--- Функция анализа шансов улучшения
+-- Функция анализа улучшений
 local function analyzeUpgradeChances()
     PredictScroll:ClearAllChildren()
     
     local items = {}
     local player = game.Players.LocalPlayer
     
-    -- Ищем предметы для улучшения
-    local inventory = player:FindFirstChild("Inventory") or player:FindFirstChild("Backpack")
-    if inventory then
-        for _, item in pairs(inventory:GetChildren()) do
-            if item:IsA("Tool") or item:FindFirstChild("Level") then
-                table.insert(items, item)
+    -- Ищем ВСЕ возможные контейнеры
+    local containers = {
+        "Inventory", "Backpack", "Cards", "Weapons", "Pets",
+        "Tools", "Items", "Collection"
+    }
+    
+    for _, containerName in pairs(containers) do
+        local container = player:FindFirstChild(containerName)
+        if container then
+            for _, item in pairs(container:GetChildren()) do
+                if item:IsA("Tool") or item:IsA("Model") or item:FindFirstChild("Level") then
+                    table.insert(items, item)
+                end
             end
         end
     end
     
-    -- Анализируем каждый предмет
-    local yOffset = 0
+    -- Если предметов нет
+    if #items == 0 then
+        local noItems = Instance.new("TextLabel")
+        noItems.Parent = PredictScroll
+        noItems.Size = UDim2.new(0.9, 0, 0, 50)
+        noItems.Position = UDim2.new(0.05, 0, 0, 10)
+        noItems.Text = "No upgradeable items found!\nCheck your inventory."
+        noItems.TextColor3 = Color3.fromRGB(255, 255, 255)
+        noItems.BackgroundTransparency = 1
+        noItems.Font = Enum.Font.Gotham
+        noItems.TextSize = 16
+        noItems.TextWrapped = true
+        PredictScroll.CanvasSize = UDim2.new(0, 0, 0, 100)
+        return
+    end
+    
+    -- Создаём карточки для каждого предмета
+    local yOffset = 10
     for i, item in pairs(items) do
         local itemFrame = Instance.new("Frame")
         local itemName = Instance.new("TextLabel")
+        local itemLevel = Instance.new("TextLabel")
         local itemChance = Instance.new("TextLabel")
         local itemStatus = Instance.new("TextLabel")
         
         itemFrame.Parent = PredictScroll
-        itemFrame.Size = UDim2.new(0.95, 0, 0, 60)
+        itemFrame.Size = UDim2.new(0.95, 0, 0, 80)
         itemFrame.Position = UDim2.new(0.025, 0, 0, yOffset)
         itemFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         itemFrame.BackgroundTransparency = 0.5
@@ -256,25 +279,41 @@ local function analyzeUpgradeChances()
         
         -- Название предмета
         itemName.Parent = itemFrame
-        itemName.Size = UDim2.new(0.6, 0, 0.5, 0)
-        itemName.Position = UDim2.new(0.05, 0, 0, 0)
-        itemName.Text = item.Name
+        itemName.Size = UDim2.new(0.8, 0, 0.3, 0)
+        itemName.Position = UDim2.new(0.05, 0, 0.1, 0)
+        itemName.Text = "Item: " .. item.Name
         itemName.TextColor3 = Color3.fromRGB(255, 255, 255)
         itemName.BackgroundTransparency = 1
         itemName.Font = Enum.Font.Gotham
         itemName.TextSize = 14
         itemName.TextXAlignment = Enum.TextXAlignment.Left
         
-        -- Шанс улучшения (симуляция)
-        local level = item:FindFirstChild("Level") and item.Level.Value or 1
-        local simulatedChance = math.max(10, 100 - (level * 15)) -- Примерная логика
+        -- Уровень предмета
+        local level = 1
+        if item:FindFirstChild("Level") then
+            level = item.Level.Value
+        end
+        
+        itemLevel.Parent = itemFrame
+        itemLevel.Size = UDim2.new(0.4, 0, 0.3, 0)
+        itemLevel.Position = UDim2.new(0.05, 0, 0.4, 0)
+        itemLevel.Text = "Level: " .. tostring(level)
+        itemLevel.TextColor3 = Color3.fromRGB(200, 200, 255)
+        itemLevel.BackgroundTransparency = 1
+        itemLevel.Font = Enum.Font.Gotham
+        itemLevel.TextSize = 12
+        itemLevel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Шанс улучшения
+        local chance = math.max(5, 100 - (level * 12))
+        if level >= 8 then chance = 5 end
         
         itemChance.Parent = itemFrame
-        itemChance.Size = UDim2.new(0.3, 0, 0.5, 0)
-        itemChance.Position = UDim2.new(0.65, 0, 0, 0)
-        itemChance.Text = simulatedChance .. "%"
-        itemChance.TextColor3 = simulatedChance == 100 and Color3.fromRGB(0, 255, 0) or 
-                               simulatedChance >= 70 and Color3.fromRGB(255, 255, 0) or 
+        itemChance.Size = UDim2.new(0.3, 0, 0.3, 0)
+        itemChance.Position = UDim2.new(0.65, 0, 0.4, 0)
+        itemChance.Text = chance .. "%"
+        itemChance.TextColor3 = chance == 100 and Color3.fromRGB(0, 255, 0) or 
+                               chance >= 50 and Color3.fromRGB(255, 255, 0) or 
                                Color3.fromRGB(255, 50, 50)
         itemChance.BackgroundTransparency = 1
         itemChance.Font = Enum.Font.GothamBold
@@ -282,23 +321,28 @@ local function analyzeUpgradeChances()
         
         -- Статус
         itemStatus.Parent = itemFrame
-        itemStatus.Size = UDim2.new(0.9, 0, 0.4, 0)
-        itemStatus.Position = UDim2.new(0.05, 0, 0.5, 0)
-        itemStatus.Text = simulatedChance == 100 and "✅ 100% SUCCESS" or 
-                         "⚠️ RISKY - " .. simulatedChance .. "%"
-        itemStatus.TextColor3 = simulatedChance == 100 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 200, 0)
+        itemStatus.Size = UDim2.new(0.9, 0, 0.3, 0)
+        itemStatus.Position = UDim2.new(0.05, 0, 0.7, 0)
+        itemStatus.Text = chance == 100 and "✅ 100% SUCCESS - SAFE" or 
+                         chance >= 70 and "⚠️ MEDIUM RISK" or
+                         chance >= 30 and "🔴 HIGH RISK" or
+                         "💀 VERY HIGH RISK"
+        itemStatus.TextColor3 = chance == 100 and Color3.fromRGB(0, 255, 0) or 
+                               chance >= 70 and Color3.fromRGB(255, 255, 0) or
+                               chance >= 30 and Color3.fromRGB(255, 150, 0) or
+                               Color3.fromRGB(255, 50, 50)
         itemStatus.BackgroundTransparency = 1
         itemStatus.Font = Enum.Font.Gotham
         itemStatus.TextSize = 12
         itemStatus.TextXAlignment = Enum.TextXAlignment.Left
         
-        yOffset = yOffset + 70
+        yOffset = yOffset + 90
     end
     
     PredictScroll.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
--- Обработчики кнопок
+-- Обработчики Predictor
 PredictToggle.MouseButton1Click:Connect(function()
     PredictFrame.Visible = true
     analyzeUpgradeChances()
@@ -308,4 +352,4 @@ ClosePredict.MouseButton1Click:Connect(function()
     PredictFrame.Visible = false
 end)
 
-print("Upgrade Predictor added to menu!")
+print("Precious Team GUI + Upgrade Predictor loaded! Press Right Shift to toggle menu.")
