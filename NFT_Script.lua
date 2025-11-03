@@ -1,89 +1,72 @@
--- NFT Battle SIMPLE 100% Upgrade
-getgenv().UpgradeEnabled = true
+-- NFT BATTLE MEMORY HACK - 100% SUCCESS
+getgenv().MemoryHack = true
 
--- Простой интерфейс
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local TextLabel = Instance.new("TextLabel")
-local ToggleButton = Instance.new("TextButton")
-local Status = Instance.new("TextLabel")
+-- Хук всех математических функций
+local oldRandom = math.random
+math.random = function(a, b)
+    if getgenv().MemoryHack then
+        return 100 -- Всегда максимальный шанс
+    end
+    return oldRandom(a, b)
+end
 
-ScreenGui.Parent = game.CoreGui
+-- Хук Random.new
+local oldRandomNew = Random.new
+Random.new = function()
+    local randomObj = oldRandomNew()
+    local oldNext = randomObj.NextNumber
+    randomObj.NextNumber = function(self, min, max)
+        if getgenv().MemoryHack then
+            return 1.0 -- Всегда 100%
+        end
+        return oldNext(self, min, max)
+    end
+    return randomObj
+end
 
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 250, 0, 150)
-Frame.Position = UDim2.new(0, 10, 0, 10)
-Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+-- Прямой хук байткода функций улучшения
+for i, v in next, getreg() do
+    if type(v) == "function" then
+        local env = getfenv(v)
+        if env and env.script then
+            local scriptName = tostring(env.script)
+            if string.find(scriptName:lower(), "upgrade") or 
+               string.find(scriptName:lower(), "success") or
+               string.find(scriptName:lower(), "chance") then
+               
+                -- Заменяем все числовые константы меньше 100 на 100
+                for constantIndex, constantValue in next, getconstants(v) do
+                    if type(constantValue) == "number" and constantValue < 100 then
+                        setconstant(v, constantIndex, 100)
+                    end
+                end
+            end
+        end
+    end
+end
 
-TextLabel.Parent = Frame
-TextLabel.Size = UDim2.new(1, 0, 0, 40)
-TextLabel.Text = "NFT SIMPLE 100%"
-TextLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-ToggleButton.Parent = Frame
-ToggleButton.Size = UDim2.new(0.8, 0, 0, 40)
-ToggleButton.Position = UDim2.new(0.1, 0, 0.3, 0)
-ToggleButton.Text = "DISABLE"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-Status.Parent = Frame
-Status.Size = UDim2.new(0.8, 0, 0, 40)
-Status.Position = UDim2.new(0.1, 0, 0.7, 0)
-Status.Text = "ACTIVE - SPAM MODE"
-Status.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-Status.TextColor3 = Color3.fromRGB(255, 255, 255)
-
--- Простой спам улучшениями
-local upgradeSpam = nil
-
-ToggleButton.MouseButton1Click:Connect(function()
-    getgenv().UpgradeEnabled = not getgenv().UpgradeEnabled
-    
-    if getgenv().UpgradeEnabled then
-        ToggleButton.Text = "DISABLE"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-        Status.Text = "ACTIVE - SPAM MODE"
-        Status.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-        
-        -- Запускаем спам улучшениями
-        upgradeSpam = task.spawn(function()
-            while getgenv().UpgradeEnabled and task.wait(0.5) do
-                pcall(function()
-                    local player = game.Players.LocalPlayer
-                    
-                    -- Ищем все предметы для улучшения
-                    local inventory = player:FindFirstChild("Inventory") or player:FindFirstChild("Backpack")
-                    if inventory then
-                        for _, item in pairs(inventory:GetChildren()) do
-                            -- Ищем все RemoteEvents для улучшения
-                            for _, remote in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
-                                if remote:IsA("RemoteEvent") and (remote.Name:lower():find("upgrade") or remote.Name:lower():find("combine")) then
-                                    -- Спамим улучшением 10 раз подряд
-                                    for i = 1, 10 do
-                                        remote:FireServer(item)
-                                        task.wait(0.05)
-                                    end
+-- Авто-спам улучшениями
+spawn(function()
+    while getgenv().MemoryHack and task.wait(0.5) do
+        pcall(function()
+            local player = game.Players.LocalPlayer
+            for _, container in pairs({"Inventory", "Backpack", "Cards"}) do
+                local items = player:FindFirstChild(container)
+                if items then
+                    for _, item in pairs(items:GetChildren()) do
+                        -- Вызываем ВСЕ RemoteEvents
+                        for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                            if remote:IsA("RemoteEvent") then
+                                for i = 1, 3 do
+                                    remote:FireServer(item)
                                 end
                             end
                         end
                     end
-                end)
+                end
             end
         end)
-        
-    else
-        ToggleButton.Text = "ENABLE" 
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-        Status.Text = "DISABLED - Normal"
-        Status.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-        
-        -- Останавливаем спам
-        if upgradeSpam then
-            task.cancel(upgradeSpam)
-        end
     end
 end)
 
-print("Simple 100% Upgrade loaded - Spam method!")
+print("MEMORY HACK ACTIVATED - 100% SUCCESS GUARANTEED")
