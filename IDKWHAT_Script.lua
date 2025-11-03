@@ -1,4 +1,160 @@
--- === ПРЕДИКТОР КОНКРЕТНЫХ АПГРЕЙДОВ ===
+-- NFT Battle Precious Team GUI - COMPLETE SCRIPT
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Watermark = Instance.new("TextLabel")
+local ToggleButton = Instance.new("TextButton")
+local TitleLabel = Instance.new("TextLabel")
+local PredictToggle = Instance.new("TextButton")
+
+ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "PreciousGUI"
+ScreenGui.ResetOnSpawn = false
+
+-- Главное окно
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BackgroundTransparency = 0.3
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+
+-- Скругленные углы
+local UICorner = Instance.new("UICorner")
+UICorner.Parent = MainFrame
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- Заголовок
+TitleLabel.Parent = MainFrame
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Text = "Precious Team Menu"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TitleLabel.BackgroundTransparency = 0.5
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 18
+TitleLabel.BorderSizePixel = 0
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.Parent = TitleLabel
+TitleCorner.CornerRadius = UDim.new(0, 12)
+
+-- Водяной знак
+Watermark.Parent = ScreenGui
+Watermark.Size = UDim2.new(0, 120, 0, 30)
+Watermark.Position = UDim2.new(1, -130, 0, 10)
+Watermark.Text = "Precious Team"
+Watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
+Watermark.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Watermark.BackgroundTransparency = 0.7
+Watermark.TextTransparency = 0.3
+Watermark.Font = Enum.Font.GothamBold
+Watermark.TextSize = 14
+Watermark.BorderSizePixel = 0
+
+local WatermarkCorner = Instance.new("UICorner")
+WatermarkCorner.Parent = Watermark
+WatermarkCorner.CornerRadius = UDim.new(0, 8)
+
+-- Кнопка водяного знака
+ToggleButton.Parent = MainFrame
+ToggleButton.Size = UDim2.new(0.7, 0, 0, 40)
+ToggleButton.Position = UDim2.new(0.15, 0, 0.3, 0)
+ToggleButton.Text = "WATERMARK: ON"
+ToggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+ToggleButton.BackgroundTransparency = 0.2
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.Gotham
+ToggleButton.TextSize = 16
+ToggleButton.BorderSizePixel = 0
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.Parent = ToggleButton
+ButtonCorner.CornerRadius = UDim.new(0, 8)
+
+-- Кнопка предиктора в главном меню
+PredictToggle = Instance.new("TextButton")
+PredictToggle.Parent = MainFrame
+PredictToggle.Size = UDim2.new(0.7, 0, 0, 40)
+PredictToggle.Position = UDim2.new(0.15, 0, 0.6, 0)
+PredictToggle.Text = "UPGRADE PREDICTOR"
+PredictToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 150)
+PredictToggle.BackgroundTransparency = 0.2
+PredictToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+PredictToggle.Font = Enum.Font.Gotham
+PredictToggle.TextSize = 16
+PredictToggle.BorderSizePixel = 0
+
+local PredictToggleCorner = Instance.new("UICorner")
+PredictToggleCorner.Parent = PredictToggle
+PredictToggleCorner.CornerRadius = UDim.new(0, 8)
+
+-- Управление
+local tweenService = game:GetService("TweenService")
+local watermarkEnabled = true
+local menuVisible = true
+
+-- Функции показа/скрытия
+local function hideMenu()
+    menuVisible = false
+    local hideTween = tweenService:Create(
+        MainFrame,
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0), BackgroundTransparency = 1}
+    )
+    hideTween:Play()
+end
+
+local function showMenu()
+    menuVisible = true
+    local showTween = tweenService:Create(
+        MainFrame,
+        TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        {Size = UDim2.new(0, 300, 0, 200), Position = UDim2.new(0.5, -150, 0.5, -100), BackgroundTransparency = 0.3}
+    )
+    showTween:Play()
+end
+
+-- Показываем меню при запуске
+showMenu()
+
+-- Обработчик Right Shift
+local UIS = game:GetService("UserInputService")
+local rightShiftDown = false
+
+UIS.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        rightShiftDown = true
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightShift and rightShiftDown then
+        rightShiftDown = false
+        if menuVisible then
+            hideMenu()
+        else
+            showMenu()
+        end
+    end
+end)
+
+-- Переключение водяного знака
+ToggleButton.MouseButton1Click:Connect(function()
+    watermarkEnabled = not watermarkEnabled
+    
+    if watermarkEnabled then
+        ToggleButton.Text = "WATERMARK: ON"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        Watermark.Visible = true
+    else
+        ToggleButton.Text = "WATERMARK: OFF" 
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(120, 40, 40)
+        Watermark.Visible = false
+    end
+end)
+
+-- === НОВЫЙ ПРЕДИКТОР АПГРЕЙДОВ ===
 local UpgradePredictorFrame = Instance.new("Frame")
 local PredictTitle = Instance.new("TextLabel")
 local PredictScroll = Instance.new("ScrollingFrame")
@@ -50,7 +206,6 @@ ScrollCorner.Parent = PredictScroll
 ScrollCorner.CornerRadius = UDim.new(0, 8)
 
 -- Кнопки выбора предметов
-SourceItemButton = Instance.new("TextButton")
 SourceItemButton.Parent = UpgradePredictorFrame
 SourceItemButton.Size = UDim2.new(0.4, 0, 0, 40)
 SourceItemButton.Position = UDim2.new(0.05, 0, 0.7, 0)
@@ -66,7 +221,6 @@ local SourceCorner = Instance.new("UICorner")
 SourceCorner.Parent = SourceItemButton
 SourceCorner.CornerRadius = UDim.new(0, 8)
 
-TargetItemButton = Instance.new("TextButton")
 TargetItemButton.Parent = UpgradePredictorFrame
 TargetItemButton.Size = UDim2.new(0.4, 0, 0, 40)
 TargetItemButton.Position = UDim2.new(0.55, 0, 0.7, 0)
@@ -83,7 +237,6 @@ TargetCorner.Parent = TargetItemButton
 TargetCorner.CornerRadius = UDim.new(0, 8)
 
 -- Кнопка предсказания
-PredictButton = Instance.new("TextButton")
 PredictButton.Parent = UpgradePredictorFrame
 PredictButton.Size = UDim2.new(0.6, 0, 0, 50)
 PredictButton.Position = UDim2.new(0.2, 0, 0.8, 0)
@@ -100,7 +253,6 @@ PredictBtnCorner.Parent = PredictButton
 PredictBtnCorner.CornerRadius = UDim.new(0, 8)
 
 -- Результат
-ResultLabel = Instance.new("TextLabel")
 ResultLabel.Parent = UpgradePredictorFrame
 ResultLabel.Size = UDim2.new(0.8, 0, 0, 60)
 ResultLabel.Position = UDim2.new(0.1, 0, 0.9, 0)
@@ -118,7 +270,6 @@ ResultCorner.Parent = ResultLabel
 ResultCorner.CornerRadius = UDim.new(0, 8)
 
 -- Кнопка закрытия
-ClosePredict = Instance.new("TextButton")
 ClosePredict.Parent = UpgradePredictorFrame
 ClosePredict.Size = UDim2.new(0.3, 0, 0, 35)
 ClosePredict.Position = UDim2.new(0.35, 0, 0.95, -40)
@@ -152,7 +303,7 @@ local function getAllPlayerItems()
         local container = player:FindFirstChild(containerName)
         if container then
             for _, item in pairs(container:GetChildren()) do
-                if item:IsA("Tool") or item:IsA("Model") or item:FindFirstChild("Level") then
+                if item:IsA("Tool") or item:IsA("Model") then
                     table.insert(items, item)
                 end
             end
@@ -229,14 +380,12 @@ end
 
 -- Функция предсказания успеха апгрейда
 local function predictUpgradeSuccess(sourceItem, targetItem)
-    -- Алгоритм предсказания на основе названий и свойств предметов
     local sourceName = string.lower(sourceItem.Name)
     local targetName = string.lower(targetItem.Name)
     
-    -- Базовый шанс
     local baseChance = 50
     
-    -- Модификаторы на основе редкости в названии
+    -- Модификаторы на основе редкости
     if string.find(sourceName, "gold") or string.find(sourceName, "legendary") then
         baseChance = baseChance + 30
     elseif string.find(sourceName, "epic") or string.find(sourceName, "rare") then
@@ -249,7 +398,7 @@ local function predictUpgradeSuccess(sourceItem, targetItem)
         baseChance = baseChance - 10
     end
     
-    -- Модификаторы на основе типа предмета
+    -- Модификаторы на основе типа
     if string.find(sourceName, "star") or string.find(sourceName, "pop") then
         baseChance = baseChance + 10
     end
@@ -258,17 +407,15 @@ local function predictUpgradeSuccess(sourceItem, targetItem)
         baseChance = baseChance + 5
     end
     
-    -- Ограничиваем шанс от 5% до 95%
     baseChance = math.max(5, math.min(95, baseChance))
     
-    -- Симуляция случайности
     local randomValue = math.random(1, 100)
     local success = randomValue <= baseChance
     
     return success, baseChance, randomValue
 end
 
--- Обработчики кнопок
+-- Обработчики кнопок предиктора
 SourceItemButton.MouseButton1Click:Connect(function()
     showItemsForSelection("source")
 end)
@@ -296,7 +443,7 @@ PredictButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Обновляем кнопку в главном меню
+-- Обработчик кнопки предиктора в главном меню
 PredictToggle.MouseButton1Click:Connect(function()
     UpgradePredictorFrame.Visible = true
     selectedSourceItem = nil
@@ -310,3 +457,5 @@ end)
 ClosePredict.MouseButton1Click:Connect(function()
     UpgradePredictorFrame.Visible = false
 end)
+
+print("Complete Precious Team GUI loaded! Press Right Shift to toggle menu.")
